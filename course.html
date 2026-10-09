@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roboracer Course</title>
+<link rel="icon" href="assets/logos/RoboRacer_SquareLogo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:ital,wght@1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
+</head>
+<body>
+<main class="wrap" id="main"></main>
+<script src="assets/js/app.js?v=6"></script>
+<script>
+shell("courses");
+const id = new URLSearchParams(location.search).get("id");
+const c = COURSES.find(x => x.id === id) || COURSES[2];
+document.title = c.title + " | Roboracer";
+const enrolled = () => (load("enrolled") || "").split(",").includes(c.id);
+const doneKey = "done-" + c.id;
+const done = () => new Set((load(doneKey) || "").split("|").filter(Boolean));
+const mods = outline(c), total = lectureCount(c);
+
+function head() {
+  const on = enrolled();
+  return `<div class="coursehead"><div><div class="crumb"><a href="index.html#courses">Courses</a> / ${c.org.replace(/-/g, " ")}</div><h1>${c.title}</h1>
+    <div style="opacity:.85">${c.weeks} weeks · ${c.effort}</div>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ${on ? "ghost" : "primary"} lg" id="enroll">${on ? "✓ Enrolled" : "Enroll now"}</button>
+      ${on ? `<button class="btn primary lg" id="view">View course</button>` : ""}</div></div>${thumb(c)}</div>`;
+}
+const about = () => `<h2 style="margin-top:0">About this course</h2>
+  <p>${c.blurb} Whether it's a well-known car manufacturer like Tesla or new technology companies like Google, many different companies are working on the development of autonomous vehicles. This emerging field provides a lot of potential, and if you are interested in the foundations of autonomous driving, this course is for you.</p>
+  <p>This is not a theory-only lecture series: it is hands-on and lab-centered for everyone interested in artificial intelligence, motion planning, control theory and applied machine learning. From the very beginning you work with a simulation environment, and optionally with real hardware: our 1/10th-scale autonomous race car.</p>
+  <h2>What you'll learn</h2><ul class="learn">${learnFor(c).map(l => `<li>${ic("check")}<span>${l}</span></li>`).join("")}</ul>
+  <h2>Prerequisites</h2><p>This course integrates the concepts above and is not intended as a beginner course in any of these subjects. The contents are best suited for the graduate level, if not at the very least an undergraduate senior-level course.</p>`;
+function syllabus() {
+  const d = done();
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px"><div style="flex:1"><small style="color:var(--muted)" id="ptxt"></small><div class="progress" style="margin-top:4px"><i id="pbar"></i></div></div><button class="btn sm" id="expand">Expand all</button></div>` +
+    mods.map((m, i) => `<div class="acc ${i === 1 ? "open" : ""}"><button>${m[0]}</button><div class="in"><ul>${m[1].map(l =>
+      `<li><label><input type="checkbox" data-k="${esc(l[0])}" ${d.has(l[0]) ? "checked" : ""}> ${l[0]}</label><small>${l[1] || ""}</small></li>`).join("")}</ul></div></div>`).join("");
+}
+const staff = () => `<h2 style="margin-top:0">${c.type === "university" && c.id !== "penn" ? "Course authors" : "Course staff"}</h2>
+  <div class="staff"><img src="${STAFF.img}" alt="${STAFF.name}"><div><b style="font-size:1.1rem">${STAFF.name}</b><p>${STAFF.bio}</p></div></div>
+  ${c.type === "university" && c.id !== "penn" ? `<p style="color:var(--muted);font-size:.9rem;margin-top:20px">Local instructors from ${c.org.replace(/-/g, " ")} are listed in the course announcements.</p>` : ""}`;
+const faq = () => `<h2 style="margin-top:0">Course logistics</h2>` + faqFor(c).map(f => `<div class="acc"><button>${f[0]}</button><div class="in">${f[1]}</div></div>`).join("");
+
+$("#main").innerHTML = head() + `<div class="layout" data-tabs><div>
+  <div class="tabs" role="tablist"><button class="on" data-tab="t1">${ic("book")} About</button><button data-tab="t2">${ic("layers")} Course outline</button><button data-tab="t3">${ic("user")} Staff</button><button data-tab="t4">${ic("calendar")} Logistics</button></div>
+  <div class="tabpane on" id="t1">${about()}</div><div class="tabpane" id="t2">${syllabus()}</div><div class="tabpane" id="t3">${staff()}</div><div class="tabpane" id="t4">${faq()}</div></div>
+  <aside class="side panel"><dl><dt>Course number</dt><dd>${c.code}</dd><dt>Classes start</dt><dd>${c.starts}</dd><dt>Classes end</dt><dd>${c.ends}</dd><dt>Estimated effort</dt><dd>${c.effort}</dd><dt>Length</dt><dd>${c.weeks} weeks · ${total} units</dd></dl>
+  <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="share">${ic("link")} Copy link</button><a class="btn sm" href="index.html#courses">← All courses</a></div></aside></div>`;
+
+function progress() { const n = $$("#t2 input:checked").length; $("#ptxt").textContent = `${n} of ${total} units completed`; $("#pbar").style.width = (100 * n / total) + "%"; }
+function bind() {
+  $("#enroll").onclick = () => { if (!requireSignIn()) return; const e = (load("enrolled") || "").split(",").filter(Boolean); const i = e.indexOf(c.id);
+    if (i < 0) e.push(c.id); else e.splice(i, 1); save("enrolled", e.join(",")); toast(i < 0 ? "Enrolled!" : "Unenrolled"); $(".coursehead").outerHTML = head(); bind(); };
+  const v = $("#view"); if (v) v.onclick = () => $$(".tabs button")[1].click();
+  $("#share").onclick = () => navigator.clipboard?.writeText(location.href).then(() => toast("Link copied"), () => toast("Copy failed"));
+}
+bind(); progress();
+$("#expand").onclick = e => { const accs = $$("#t2 .acc"); const all = accs.every(a => a.classList.contains("open")); accs.forEach(a => a.classList.toggle("open", !all)); e.target.textContent = all ? "Expand all" : "Collapse all"; };
+$("#t2").addEventListener("change", e => { if (!e.target.matches("input")) return; if (!requireSignIn()) { e.target.checked = false; return; }
+  save(doneKey, $$("#t2 input:checked").map(i => i.dataset.k).join("|")); progress(); });
+document.addEventListener("authchange", () => { $(".coursehead").outerHTML = head(); bind(); });
+initChat(c);
+</script>
+</body>
+</html>
