@@ -214,8 +214,8 @@ function runRules(rules, qRaw, fallback) {
 function courseRules(c) {
   const org = c.org.replace(/-/g, " "), uniStaff = c.type === "university" && c.id !== "penn";
   return [
-    { re: /\b(hi|hello|hey|yo|good (morning|afternoon|evening))\b/, kws: ["hello"], an: () => ({ html: `Hi! Ask me about <b>${esc(c.title)}</b> — duration, schedule, topics, enrollment, grading, prerequisites or staff.` }) },
-    { re: /\b(how are you|how'?s it going|who are you|what are you|are you (a |an )?(bot|robot|ai|human))\b/, an: () => ({ html: `I'm doing well, thanks for asking! I'm a simple assistant that only knows about <b>${esc(c.title)}</b> — what would you like to know?` }) },
+    { re: /\b(hi|hello|hey|yo|good (morning|afternoon|evening))\b/, kws: ["hello"], an: () => ({ html: `Hi! I'm RAS Bot. Ask me about <b>${esc(c.title)}</b> — duration, schedule, topics, enrollment, grading, prerequisites or staff.` }) },
+    { re: /\b(how are you|how'?s it going|who are you|what are you|are you (a |an )?(bot|robot|ai|human))\b/, an: () => ({ html: `I'm doing well, thanks for asking! I'm RAS Bot, a simple assistant that only knows about <b>${esc(c.title)}</b> — what would you like to know?` }) },
     { re: /\b(how long|duration|weeks?|length|how many weeks)\b/, kws: ["duration", "weeks", "length"], an: () => ({ html: `${esc(c.title)} runs <b>${c.weeks} weeks</b> (${esc(c.effort)}), with ${lectureCount(c)} units across ${outline(c).length} modules.` }) },
     { re: /\b(start|end|when (does|is)|date|schedule|deadline)\b/, kws: ["schedule", "start", "date"], an: () => ({ html: `Classes start <b>${esc(c.starts)}</b> and run through <b>${esc(c.ends)}</b>. You can enroll any time before it ends.` }) },
     { re: /\b(effort|hours?|workload|time commitment|how much time)\b/, kws: ["effort", "hours", "workload"], an: () => ({ html: `Plan for about <b>${esc(c.effort)}</b> on this course.` }) },
@@ -236,7 +236,7 @@ function courseRules(c) {
 function platformRules() {
   return [
     { re: /\b(hi|hello|hey|yo|good (morning|afternoon|evening))\b/, an: () => ({ html: `Hi! I can help you find a course, explain enrollment or point you to the instructor guide. Open a course page and I'll switch to answering questions about that specific course.` }) },
-    { re: /\b(how are you|how'?s it going|who are you|what are you|are you (a |an )?(bot|robot|ai|human))\b/, an: () => ({ html: `Doing well, thanks! I'm a simple assistant for the Roboracer platform — ask me how to find or teach a course.` }) },
+    { re: /\b(how are you|how'?s it going|who are you|what are you|are you (a |an )?(bot|robot|ai|human))\b/, an: () => ({ html: `Doing well, thanks! I'm RAS Bot, a simple assistant for the RAS Robotics platform — ask me how to find or teach a course.` }) },
     { re: /\b(find|browse|course|catalog|list|search)\b/, kws: ["browse", "catalog", "search"], an: () => ({ html: `Browse all courses in the Courses section on the home page — search, filter by institution or duration, and sort them.`, cta: [{ label: "Browse courses", href: "index.html#courses" }] }) },
     { re: /\b(teach|instructor|become|university|rebrand|lab)\b/, kws: ["teach", "instructor", "rebrand"], an: () => ({ html: `Head to the <b>For Instructors</b> page — register as an instructor, follow the step-by-step guide, and plan your course in the dashboard.`, cta: [{ label: "For Instructors", href: "instructors.html" }] }) },
     { re: /\b(free|cost|price|licen[cs]e|money|fee)\b/, kws: ["free", "price", "fee"], an: () => ({ html: `Every course is free, and instructors can copy the material without any licensing.` }) },
@@ -252,19 +252,19 @@ function ctaHtml(cta) {
 function initChat(course) {
   const isCourse = !!course;
   const chips = isCourse ? ["How long is it?", "What will I learn?", "How do I enroll?", "Do I need the hardware?"] : ["How do I find a course?", "How do I teach a course?", "Is it free?"];
-  const greet = isCourse ? `Hi! I'm the course assistant for <b>${esc(course.title)}</b>. Ask me about its schedule, topics, enrollment, grading or staff — I only know about this course.`
-    : `Hi! I can help with general questions about Roboracer. Open a course page and I'll answer questions about that specific course.`;
+  const greet = isCourse ? `Hi! I'm <b>RAS Bot</b>, your assistant for <b>${esc(course.title)}</b>. Ask me about its schedule, topics, enrollment, grading or staff — I only know about this course.`
+    : `Hi! I'm <b>RAS Bot</b>. I can help with general questions about the RAS Robotics courses. Open a course page and I'll answer questions about that specific course.`;
   const fallback = isCourse
     ? () => ({ html: `That's outside what I know about <b>${esc(course.title)}</b> — I can only help with this course. Try asking about its duration, schedule, topics, enrollment, grading, prerequisites or staff.` })
     : () => ({ html: `I can only answer general questions about the platform here. Open a specific course page and I'll answer questions about that course.` });
   const rules = isCourse ? courseRules(course) : platformRules();
 
   document.body.insertAdjacentHTML("beforeend", `
-  <button class="chat-fab" id="chatFab" aria-label="Open course chat" aria-expanded="false">${ic("chat")}</button>
-  <div class="chat-panel" id="chatPanel" role="dialog" aria-label="Chat">
+  <button class="chat-fab" id="chatFab" aria-label="Open RAS Bot chat" aria-expanded="false">${ic("chat")}</button>
+  <div class="chat-panel" id="chatPanel" role="dialog" aria-label="RAS Bot chat">
     <div class="chat-head"><div class="chat-head-ico">${ic("chat")}</div>
-      <div class="chat-head-t"><b>${isCourse ? "Course assistant" : "Roboracer assistant"}</b><span>${esc(isCourse ? course.title : "Ask about the platform")}</span></div>
-      <button class="icon-btn" id="chatClose" aria-label="Close chat">✕</button></div>
+      <div class="chat-head-t"><b>RAS Bot</b><span>${esc(isCourse ? course.title : "Ask about the platform")}</span></div>
+      <button class="icon-btn" id="chatClose" aria-label="Close RAS Bot chat">✕</button></div>
     <div class="chat-body" id="chatBody"></div>
     <div class="chat-chips" id="chatChips">${chips.map(x => `<button type="button" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div>
     <form class="chat-form" id="chatForm"><input id="chatInput" placeholder="${isCourse ? "Ask about this course…" : "Ask a question…"}" autocomplete="off" maxlength="200"><button class="btn primary sm" type="submit" aria-label="Send">${ic("arrow")}</button></form>

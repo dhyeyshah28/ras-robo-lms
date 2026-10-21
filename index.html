@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Roboracer Courses</title>
-<meta name="description" content="Free, open autonomous driving lectures – perception, planning, control and the Roboracer vehicle.">
+<meta name="description" content="Free, open RAS Robotics lectures – manipulation, perception, planning, navigation, controls and the Roboracer vehicle.">
 <link rel="icon" href="assets/logos/RoboRacer_SquareLogo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:ital,wght@1,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=6">
+<link rel="stylesheet" href="assets/css/style.css?v=14">
 </head>
 <body>
 <main class="wrap">
   <section class="hero"><div class="hero-img">
     <div class="hero-text">
       <span class="eyebrow">Free &amp; open for everyone</span>
-      <h1>The largest open collection of <span>autonomous driving</span> lectures</h1>
+      <h1>The largest open collection of <span style="white-space:nowrap">RAS Robotics</span> lectures</h1>
       <p>From perception to planning and control, from hardware to software stacks. Take everything for free, or teach it at your university.</p>
       <div class="row"><a class="btn primary lg" href="#courses">Browse courses</a><a class="btn ghost lg" href="instructors.html">Teach this course</a></div>
     </div></div></section>
@@ -25,6 +25,24 @@
     <div class="stat"><div><b data-n="1200">0</b><span>Members</span></div></div>
     <div class="stat"><div><b data-n="12">0</b><span>Instructors</span></div></div>
     <div class="stat"><div><b data-n="7">0</b><span>Institutions</span></div></div>
+  </section>
+
+
+  <section class="roulette" aria-label="What you can learn, teach and evaluate">
+    <div class="rl-left">
+      <span class="rl-pill"><i></i>Open &amp; free · RAS Robotics</span>
+      <h2 class="rl-tag"><span>Learn.</span><span>Teach.</span><span>Evaluate.</span></h2>
+      <p class="rl-sub">One open platform for every core area of robotics, from the first lecture to live feedback on every submission.</p>
+      <a class="rl-link" href="#courses">Explore all courses <span data-ic="arrow"></span></a>
+    </div>
+    <div class="rl-right">
+      <div class="rl-wheel" aria-live="off">
+        <ul id="rl" aria-hidden="true"></ul>
+        <span class="rl-focus" aria-hidden="true"></span>
+        <span class="sr-only">Manipulation, perception, planning, navigation and controls</span>
+      </div>
+      <div class="rl-meta" aria-hidden="true"><span class="rl-bar" id="rlbar"><i id="rlb"></i></span></div>
+    </div>
   </section>
 
   <section id="mycourses" hidden style="margin-top:56px">
@@ -43,18 +61,54 @@
     <div class="grid" id="grid"></div>
   </section>
 
+
+  <section class="sect lb" id="leaderboard">
+    <div class="sect-head"><span class="kicker">Leaderboard &amp; replay</span><h2>Test, compare and improve together</h2>
+      <p>Visualize your implementation alongside teams from around the world, with integrated grading, live leaderboards and replays built into your course.</p></div>
+    <div class="lb-grid">
+      <div class="lb-demo">
+        <div class="lb-bar"><i></i><i></i><i></i><span>roboracer-class.github.io/leaderboard</span></div>
+        <div class="lb-frame"><video src="assets/logos/leaderboard.mp4" poster="assets/leaderboard/og.png" controls muted loop autoplay playsinline preload="metadata"></video></div>
+      </div>
+      <div class="lb-side">
+        <ul class="lb-points">
+          <li><div class="ico" data-ic="grade"></div><div><h3>Integrated grading</h3><p>Every submission is scored automatically in the grading simulator, so results flow straight into your course grades.</p></div></li>
+          <li><div class="ico" data-ic="flag"></div><div><h3>Live leaderboards</h3><p>Best clean lap per team, updated live, for every lab from wall following to model predictive control.</p></div></li>
+          <li><div class="ico" data-ic="video"></div><div><h3>Replay any run</h3><p>Compare up to five cars on one track, follow a car, and share a link to any race.</p></div></li>
+        </ul>
+        <a class="btn primary" href="https://roboracer-class.github.io/leaderboard/" target="_blank" rel="noopener">Open the full leaderboard <span data-ic="arrow"></span></a>
+      </div>
+    </div>
+  </section>
+
   <section class="sect" id="discover">
     <div class="sect-head"><span class="kicker">The platform</span><h2>Everything in one open platform</h2>
       <p>One all-in-one course that is not missing anything – ready to take, teach and make your own.</p></div>
     <div class="features" id="features"></div>
   </section>
 </main>
-<script src="assets/js/app.js?v=6"></script>
+<script src="assets/js/app.js?v=14"></script>
 <script>
 shell("courses");
 initChat(null);
 const STATS = ["book", "users", "cap", "building"];
 $$(".stat").forEach((s, i) => s.insertAdjacentHTML("afterbegin", ic(STATS[i])));
+
+const RL = ["Manipulation", "Perception", "Planning", "Navigation", "Controls"];
+(() => {
+  const ul = $("#rl"), n = RL.length; let k = 0;
+  ul.innerHTML = RL.map(w => `<li>${w}</li>`).join("");
+  const items = [...ul.children], bar = $("#rlb"), track = $("#rlbar");
+  track.insertAdjacentHTML("afterbegin", RL.map(() => "<u></u>").join("")); track.style.setProperty("--n", n); bar.style.width = `calc((100% - ${(n - 1) * 6}px) / ${n})`;
+  document.querySelectorAll(".rl-link [data-ic]").forEach(e => e.innerHTML = ic(e.dataset.ic));
+  const paint = () => {
+    items.forEach((li, i) => { let d = ((i - k) % n + n) % n; if (d > n / 2) d -= n; li.style.setProperty("--d", d); li.dataset.p = Math.abs(d) > 1 ? "far" : d; });
+    bar.style.transform = `translateX(calc(${k} * (100% + 6px)))`;
+  };
+  paint();
+  setInterval(() => { k = (k + 1) % n; paint(); }, 3000);
+})();
+document.querySelectorAll("#leaderboard [data-ic]").forEach(e => e.innerHTML = ic(e.dataset.ic));
 const FEATS = [
   ["slides", "Lecture slides", "Complete, well-structured slide decks for every lecture – free to copy, edit and reuse."],
   ["video", "Lecture videos", "Recorded lectures from perception to planning and control, plus curated videos from other researchers."],
